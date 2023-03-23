@@ -272,9 +272,9 @@ public class DeviceCapabilityListener {
     private void registerReceivers() {
         logd("registerReceivers");
         IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         filter.addAction(TelecomManager.ACTION_TTY_PREFERRED_MODE_CHANGED);
-        mContext.registerReceiver(mReceiver, filter);
+        mContext.registerReceiver(mReceiver, filter, android.Manifest.permission.MODIFY_PHONE_STATE,
+                null);
 
         ContentResolver resolver = mContext.getContentResolver();
         if (resolver != null) {
@@ -388,11 +388,6 @@ public class DeviceCapabilityListener {
                     int preferredMode = intent.getIntExtra(TelecomManager.EXTRA_TTY_PREFERRED_MODE,
                             TelecomManager.TTY_MODE_OFF);
                     handleTtyPreferredModeChanged(preferredMode);
-                    break;
-
-                case Intent.ACTION_AIRPLANE_MODE_CHANGED:
-                    boolean airplaneMode = intent.getBooleanExtra("state", false);
-                    handleAirplaneModeChanged(airplaneMode);
                     break;
             }
         }
@@ -568,15 +563,6 @@ public class DeviceCapabilityListener {
         if (isChanged) {
             mHandler.sendTriggeringPublishMessage(
                 PublishController.PUBLISH_TRIGGER_TTY_PREFERRED_CHANGE);
-        }
-    }
-
-    private void handleAirplaneModeChanged(boolean state) {
-        boolean isChanged = mCapabilityInfo.updateAirplaneMode(state);
-        logi("Airplane mode changed: " + state + ", isChanged="+ isChanged);
-        if (isChanged) {
-            mHandler.sendTriggeringPublishMessage(
-                    PublishController.PUBLISH_TRIGGER_AIRPLANE_MODE_CHANGE);
         }
     }
 
